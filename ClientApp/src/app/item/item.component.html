@@ -1,6 +1,16 @@
 <div *ngIf="item">
   <p>{{ item.Name }}</p>
   <p>{{ item.Seller.FirstName}} {{ item.Seller.LastName}}</p>
-  <p>{{ item.Bids[0].User.FirstName }} bid ${{ item.Bids[0].Ammount }}</p>
+  <p >{{ item.Bids[lastbid].User.FirstName }} bid ${{ item.Bids[lastbid].Ammount }}</p>
+</div>
+<div>
+  <h3>Add Bid</h3>
+  <form (ngSubmit)="Bid()">
+    <div>
+      Ammount:<input type="number" name="Ammount" [(ngModel)]="Ammount">
+      <p *ngIf="errors && errors.Ammount">{{ errors.Ammount }}</p>
+    </div>
+    <button type="submit">Submit</button>
+  </form>
 </div>
 <button [routerLink]="['/auction']">Back</button>

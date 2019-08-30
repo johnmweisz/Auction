@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Params, Router } from "@angular/router";
 
@@ -10,7 +10,12 @@ import { ActivatedRoute, Params, Router } from "@angular/router";
 export class ItemComponent implements OnInit {
   
   public ItemId: number;
+  public UserId: number;
+  public Ammount: number;
   public item: object;
+  public errors: object = [];
+  public lastbid: number;
+  public user: object;
 
   constructor(
     public _http: HttpClient,
@@ -29,13 +34,52 @@ export class ItemComponent implements OnInit {
     }
 
   ngOnInit() {
-
+    this.getUser();
   }
 
   getItem(){
     this._http.get<object>(`./Home/GetItem/${this.ItemId}`).subscribe(
-      result => this.item = result, 
+      result => {
+        this.item = result
+        this.lastbid = result['Bids'].length-1;
+      }, 
       error => console.error(error)
     );
+  }
+  
+  getUser(): void {
+    this._http.get<object>('./Home/GetUser').subscribe(
+      result => {
+        this.user = result;
+        this.UserId = result['UserId'];
+      },
+      error => console.error(error)
+    )
+  }
+
+  Bid(){
+    if(this.Ammount == null){
+      this.errors['Ammount'] = "Please enter a value";
+      return
+    }
+    const NewBid = {
+      Ammount: this.Ammount,
+      UserId: this.UserId,
+      ItemId: this.ItemId,
+    }
+    return this._http.post("./Home/BidItem", NewBid).subscribe(
+      data => {
+        this.errors = [];
+        this.getItem();
+      },
+      err => {
+        for(let key in err.error.value){
+          this.errors[key] = err.error.value[key].errors[0].errorMessage;
+        }
+      }
+    );
+  }
+  ngOnDestroy() {
+    
   }
 }
