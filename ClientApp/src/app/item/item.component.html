@@ -1,3 +1,5 @@
-<p>
-  item works!
-</p>
+<div *ngIf="item">
+  <p>{{ item.Name }}</p>
+  <p>{{ item.Seller.FirstName}} {{ item.Seller.LastName}}</p>
+  <p>{{ item.Bids[0].User.FirstName }} bid ${{ item.Bids[0].Ammount }}</p>
+</div>

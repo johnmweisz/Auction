@@ -28,6 +28,7 @@ import { ItemComponent } from './item/item.component';
       { path: 'home', component: HomeComponent, pathMatch: 'full' },
       { path: 'auction', component: AuctionComponent },
       { path: 'new', component: NewItemComponent},
+      { path: 'item/:ItemId', component: ItemComponent},
     ])
   ],
   providers: [],

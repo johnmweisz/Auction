@@ -90,12 +90,10 @@ namespace BeltExam.Controllers
             }
             return BadRequest(Json(ModelState));
         }
-        [HttpGet("[action]")]
-        public IActionResult GetItem(int ItemId)
+        [HttpGet("item/{ItemId}")]
+        public IActionResult GetItem(int? ItemId)
         {
-            // Check if logged in.
-            int? UserId = HttpContext.Session.GetInt32("UserId");
-            if(UserId != null)
+            if(ItemId != null)
             {
                 // Fetch Item.
                 Item GetItemById = _db.Items
@@ -103,7 +101,12 @@ namespace BeltExam.Controllers
                 .Include(a => a.Bids)
                     .ThenInclude(b => b.User)
                 .FirstOrDefault(a => a.ItemId == ItemId);
-                return Ok(Json(GetItemById));
+                return Ok(JsonConvert.SerializeObject(GetItemById, Formatting.Indented, 
+                    new JsonSerializerSettings 
+                        { 
+                            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                        }
+                ));
             }
             return BadRequest();
         }

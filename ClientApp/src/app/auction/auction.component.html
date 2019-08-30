@@ -13,7 +13,7 @@
   <tbody>
     <tr *ngFor="let item of items">
       <td>
-        <a href="">{{ item.Name }}</a>
+        <a [routerLink]="['/item', item.ItemId]">{{ item.Name }}</a>
       </td>
       <td>{{ item.Seller.FirstName }}</td>
       <td>{{ item.Bids[0].Ammount }}</td>

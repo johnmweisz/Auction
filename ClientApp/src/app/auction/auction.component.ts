@@ -10,11 +10,13 @@ export class AuctionComponent implements OnInit {
   public user: object;
   public items: object;
 
-  constructor(private _http: HttpClient) { }
-
-  ngOnInit() {
+  constructor(private _http: HttpClient) { 
     this.getItems();
     this.getUser();
+  }
+
+  ngOnInit() {
+
   }
 
   getItems(){
