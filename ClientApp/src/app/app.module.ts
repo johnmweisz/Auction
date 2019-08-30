@@ -10,6 +10,8 @@ import { HomeComponent } from './home/home.component';
 import { AuctionComponent } from './auction/auction.component';
 import { NewItemComponent } from './new-item/new-item.component';
 import { ItemComponent } from './item/item.component';
+import { LoginComponent } from './login/login.component';
+import { RegisterComponent } from './register/register.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +20,9 @@ import { ItemComponent } from './item/item.component';
     HomeComponent,
     AuctionComponent,
     NewItemComponent,
-    ItemComponent
+    ItemComponent,
+    LoginComponent,
+    RegisterComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),

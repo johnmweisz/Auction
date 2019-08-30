@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
-namespace BeltExam.Controllers
+namespace Auction.Controllers
 {
     [Route("[controller]")]
     public class HomeController : Controller
@@ -151,19 +151,6 @@ namespace BeltExam.Controllers
                         ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                     }
             ));
-        }
-        [HttpGet("Item/{ItemId}/delete")]
-        public IActionResult DeleteItem(int? ItemId)
-        {
-            int? UserId = HttpContext.Session.GetInt32("UserId");
-            if(UserId != null && ItemId != null)
-            {
-                Item GetItemById = _db.Items.FirstOrDefault(a => a.ItemId == ItemId);
-                _db.Remove(GetItemById);
-                _db.SaveChanges();
-                return RedirectToAction("Index");
-            }
-            return RedirectToAction("LogReg", "LogReg");
         }
 
         public void ResolveAuction()

@@ -19,7 +19,6 @@ namespace Auction.Models
         [Required]
         [EmailAddress]
         public string Email {get;set;}
-        [JsonIgnore]
         [Required]
         [RegularExpression(@"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$", ErrorMessage="Minimum eight characters, at least one letter, one number and one special character.")]
         [DataType(DataType.Password)]
@@ -29,7 +28,6 @@ namespace Auction.Models
         public DateTime UpdatedAt {get;set;} = DateTime.Now;
         // Not Mapped
         [NotMapped]
-        [JsonIgnore]
         [Compare("Password")]
         [DataType(DataType.Password)]
         [Display(Name = "Confirm Password")]

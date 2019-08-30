@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
-namespace BeltExam.Controllers
+namespace Auction.Controllers
 {
     
     public class LogRegController : Controller

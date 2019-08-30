@@ -10,9 +10,7 @@ namespace Auction.Models
     {
         [Key]
         public int BidId {get;set;}
-        // [JsonIgnore] cant do this on creation
         public int ItemId {get;set;}
-        // [JsonIgnore]
         public int UserId {get;set;}
         [Required]
         [Display(Name = "Bid")]

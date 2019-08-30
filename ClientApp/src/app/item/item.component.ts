@@ -43,7 +43,7 @@ export class ItemComponent implements OnInit {
         this.item = result
         this.lastbid = result['Bids'].length-1;
       }, 
-      error => console.error(error)
+      err => console.error(err)
     );
   }
   
