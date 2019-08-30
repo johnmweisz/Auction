@@ -1,0 +1,23 @@
+<div>
+  <h3>Add Item</h3>
+  <form (ngSubmit)="createItem()">
+    <div>
+      Name:<input type="text" name="Name" [(ngModel)]="Name">
+      <p *ngIf="errors && errors.Name">{{ errors.Name }}</p>
+    </div>
+    <div>
+      End Date:<input type="date" name="End" [(ngModel)]="End">
+      <p *ngIf="errors && errors.End">{{ errors.End }}</p>
+    </div>
+    <div>
+      Starting Bid:<input type="number" name="StartingBid" [(ngModel)]="StartingBid">
+      <p *ngIf="errors && errors.StartingBid">{{ errors.StartingBid }}</p>
+    </div>
+    <div>
+      Description:<input type="text" name="Description" [(ngModel)]="Description">
+      <p *ngIf="errors && errors.Description">{{ errors.Description }}</p>
+    </div>
+    <button type="submit">Submit</button>
+  </form>
+</div>
+
