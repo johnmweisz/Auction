@@ -33,7 +33,7 @@ export class ItemComponent implements OnInit {
   }
 
   getItem(){
-    this._http.get<object>(`./Home/item/${this.ItemId}`).subscribe(
+    this._http.get<object>(`./Home/GetItem/${this.ItemId}`).subscribe(
       result => this.item = result, 
       error => console.error(error)
     );

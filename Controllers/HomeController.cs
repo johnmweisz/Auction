@@ -71,17 +71,14 @@ namespace BeltExam.Controllers
         [HttpPost("[action]")]
         public IActionResult NewItem([FromBody] Item formobject)
         {
-            // Check if logged in.
-            int? UserId = HttpContext.Session.GetInt32("UserId");
-            if(ModelState.IsValid && UserId != null)
+            if(ModelState.IsValid)
             {
                 // Add Item to _db.
-                formobject.UserId = UserId;
                 _db.Add(formobject);
                 _db.SaveChanges();
                 //Create new bid.
                 Bid NewBid = new Bid();
-                NewBid.UserId = (int)UserId;
+                NewBid.UserId = formobject.ItemId;
                 NewBid.ItemId = formobject.ItemId;
                 NewBid.Ammount = formobject.StartingBid;
                 _db.Add(NewBid);
@@ -90,7 +87,7 @@ namespace BeltExam.Controllers
             }
             return BadRequest(Json(ModelState));
         }
-        [HttpGet("item/{ItemId}")]
+        [HttpGet("[action]/{ItemId}")]
         public IActionResult GetItem(int? ItemId)
         {
             if(ItemId != null)
@@ -110,58 +107,50 @@ namespace BeltExam.Controllers
             }
             return BadRequest();
         }
-        [HttpPost("item/{ItemId}/bid")]
-        public IActionResult BidItem(int? ItemId, Display formobject)
+        [HttpPost("[action]")]
+        public IActionResult BidItem([FromBody] Bid formobject)
         {
-            int? UserId = HttpContext.Session.GetInt32("UserId");
-            if(UserId != null && ItemId != null)
+            if(!ModelState.IsValid)
             {
-                Display viewobject = new Display();
-                // Fetch Item.
-                Item GetItemById = _db.Items
-                .Include(i => i.Seller)
-                .Include(a => a.Bids)
-                    .ThenInclude(b => b.User)
-                .FirstOrDefault(a => a.ItemId == ItemId);
-                // Fetch User and their Items.
-                User GetUserById = _db.Users
-                .Include(i => i.ItemsForSale)
-                .Include(i => i.Bids)
-                    .ThenInclude(l => l.Item)
-                .FirstOrDefault(u => u.UserId == UserId);
-                // Set Viewbag.
-                ViewBag.User = GetUserById;
-                // Find Top Bid.
-                Bid WinningBid = _db.Bids.OrderByDescending(i => i.Ammount).First();
-                if(!ModelState.IsValid)
-                {
-                    viewobject.Item = GetItemById;
-                    return View("Item", viewobject);
-                }
-                // Check if funds available.
-                if(GetUserById.Wallet < formobject.Bid.Ammount)
-                {
-                    ModelState.AddModelError("Bid.Ammount", $"Sorry you only have {GetUserById.Wallet} available.");
-                    viewobject.Item = GetItemById;
-                    return View("Item", viewobject);
-                }
-                // Check if bid is higher than previous bid & min.
-                if(WinningBid.Ammount > formobject.Bid.Ammount)
-                {
-                    ModelState.AddModelError("Bid.Ammount", "Your bid is not high enough.");
-                    viewobject.Item = GetItemById;
-                    return View("Item", viewobject);
-                }
-                //Create new bid.
-                Bid NewBid = new Bid();
-                NewBid.UserId = (int)UserId;
-                NewBid.ItemId = (int)ItemId;
-                NewBid.Ammount = formobject.Bid.Ammount;
-                _db.Add(NewBid);
-                _db.SaveChanges();
-                return RedirectToAction("Item", new { ItemId = ItemId});
+                return BadRequest(Json(ModelState));
             }
-            return RedirectToAction("LogReg", "LogReg");
+            // Fetch User.
+            User GetUserById = _db.Users.FirstOrDefault(u => u.UserId == formobject.UserId);
+            // Fetch Item.
+            Item GetItemById = _db.Items.FirstOrDefault(a => a.ItemId == formobject.ItemId);
+            // Find Top Bid.
+            Bid WinningBid = _db.Bids.OrderByDescending(i => i.Ammount).First();
+            // Check if funds available.
+            if(GetUserById.Wallet < formobject.Ammount)
+            {
+                ModelState.AddModelError("Ammount", $"Sorry you only have {GetUserById.Wallet} available.");
+                return BadRequest(Json(ModelState));
+            }
+            // Check if bid is higher than previous bid & min.
+            if(WinningBid.Ammount > formobject.Ammount)
+            {
+                ModelState.AddModelError("Ammount", "Your bid is not high enough.");
+                return BadRequest(Json(ModelState));
+            }
+            // Create new bid.
+            Bid NewBid = new Bid();
+            NewBid.UserId = formobject.UserId;
+            NewBid.ItemId = formobject.ItemId;
+            NewBid.Ammount = formobject.Ammount;
+            _db.Add(NewBid);
+            _db.SaveChanges();
+            // Fetch updated Item.
+            Item UpdatedItem = _db.Items
+            .Include(i => i.Seller)
+            .Include(a => a.Bids)
+                .ThenInclude(b => b.User)
+            .FirstOrDefault(a => a.ItemId == formobject.ItemId);
+            return Ok(JsonConvert.SerializeObject(UpdatedItem, Formatting.Indented, 
+                new JsonSerializerSettings 
+                    { 
+                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                    }
+            ));
         }
         [HttpGet("Item/{ItemId}/delete")]
         public IActionResult DeleteItem(int? ItemId)

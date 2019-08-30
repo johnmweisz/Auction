@@ -7,7 +7,6 @@
       <th>Seller</th>
       <th>Top Bid</th>
       <th>Time Remaining</th>
-      <th>Actions</th>
     </tr>
   </thead>
   <tbody>
@@ -18,9 +17,6 @@
       <td>{{ item.Seller.FirstName }}</td>
       <td>{{ item.Bids[0].Ammount }}</td>
       <td>{{ item.TimeRemainingText }}</td>
-      <td>
-        <button *ngIf="user.UserId == item.Seller.UserId">can edit</button>
-      </td>
     </tr>
   </tbody>
 </table>
