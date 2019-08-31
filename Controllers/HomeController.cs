@@ -18,18 +18,7 @@ namespace Auction.Controllers
         {
             _db = context;
         }
-        // Controllers:
-        [HttpGet("[action]")]
-        public IActionResult Index()
-        {
-            // Check if logged in.
-            int? UserId = HttpContext.Session.GetInt32("UserId");
-            if(UserId != null)
-            {
-                return Redirect("/auction");
-            }
-            return RedirectToAction("LogReg", "LogReg");
-        }
+
         [HttpGet("[action]")]
         public IActionResult GetItems()
         {
@@ -48,45 +37,27 @@ namespace Auction.Controllers
                     }
             ));
         }
-        [HttpGet("[action]")]
-        public IActionResult GetUser()
-        {
-            // Check if logged in.
-            int? UserId = HttpContext.Session.GetInt32("UserId");
-            if(ModelState.IsValid && UserId != null)
-            {
-                // Fetch user and their items.
-                User GetUserById = _db.Users
-                .Include(u => u.ItemsForSale)
-                .FirstOrDefault(u => u.UserId == (int)UserId);
-                return Ok(JsonConvert.SerializeObject(GetUserById, Formatting.Indented, 
-                    new JsonSerializerSettings 
-                        { 
-                            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                        }
-                ));
-            }
-            return BadRequest();
-        }
+
         [HttpPost("[action]")]
-        public IActionResult NewItem([FromBody] Item formobject)
+        public IActionResult NewItem([FromBody] Item NewItem)
         {
             if(ModelState.IsValid)
             {
                 // Add Item to _db.
-                _db.Add(formobject);
+                _db.Add(NewItem);
                 _db.SaveChanges();
                 //Create new bid.
                 Bid NewBid = new Bid();
-                NewBid.UserId = formobject.ItemId;
-                NewBid.ItemId = formobject.ItemId;
-                NewBid.Ammount = formobject.StartingBid;
+                NewBid.UserId = NewItem.ItemId;
+                NewBid.ItemId = NewItem.ItemId;
+                NewBid.Ammount = NewItem.StartingBid;
                 _db.Add(NewBid);
                 _db.SaveChanges();
                 return Ok(Json(new {ItemId = NewBid.ItemId}));
             }
             return BadRequest(Json(ModelState));
         }
+
         [HttpGet("[action]/{ItemId}")]
         public IActionResult GetItem(int? ItemId)
         {
@@ -107,36 +78,37 @@ namespace Auction.Controllers
             }
             return BadRequest();
         }
+
         [HttpPost("[action]")]
-        public IActionResult BidItem([FromBody] Bid formobject)
+        public IActionResult BidItem([FromBody] Bid TryBid)
         {
             if(!ModelState.IsValid)
             {
                 return BadRequest(Json(ModelState));
             }
             // Fetch User.
-            User GetUserById = _db.Users.FirstOrDefault(u => u.UserId == formobject.UserId);
+            User GetUserById = _db.Users.FirstOrDefault(u => u.UserId == TryBid.UserId);
             // Fetch Item.
-            Item GetItemById = _db.Items.FirstOrDefault(a => a.ItemId == formobject.ItemId);
+            Item GetItemById = _db.Items.FirstOrDefault(a => a.ItemId == TryBid.ItemId);
             // Find Top Bid.
-            Bid WinningBid = _db.Bids.OrderByDescending(i => i.Ammount).First();
+            Bid WinningBid = _db.Bids.Where(b => b.ItemId == TryBid.ItemId).OrderByDescending(i => i.Ammount).First();
             // Check if funds available.
-            if(GetUserById.Wallet < formobject.Ammount)
+            if(GetUserById.Wallet < TryBid.Ammount)
             {
                 ModelState.AddModelError("Ammount", $"Sorry you only have {GetUserById.Wallet} available.");
                 return BadRequest(Json(ModelState));
             }
             // Check if bid is higher than previous bid & min.
-            if(WinningBid.Ammount > formobject.Ammount)
+            if(WinningBid.Ammount > TryBid.Ammount)
             {
                 ModelState.AddModelError("Ammount", "Your bid is not high enough.");
                 return BadRequest(Json(ModelState));
             }
             // Create new bid.
             Bid NewBid = new Bid();
-            NewBid.UserId = formobject.UserId;
-            NewBid.ItemId = formobject.ItemId;
-            NewBid.Ammount = formobject.Ammount;
+            NewBid.UserId = TryBid.UserId;
+            NewBid.ItemId = TryBid.ItemId;
+            NewBid.Ammount = TryBid.Ammount;
             _db.Add(NewBid);
             _db.SaveChanges();
             // Fetch updated Item.
@@ -144,7 +116,7 @@ namespace Auction.Controllers
             .Include(i => i.Seller)
             .Include(a => a.Bids)
                 .ThenInclude(b => b.User)
-            .FirstOrDefault(a => a.ItemId == formobject.ItemId);
+            .FirstOrDefault(a => a.ItemId == TryBid.ItemId);
             return Ok(JsonConvert.SerializeObject(UpdatedItem, Formatting.Indented, 
                 new JsonSerializerSettings 
                     { 
@@ -167,11 +139,11 @@ namespace Auction.Controllers
             {
                 if((Item.End - DateTime.Now).TotalSeconds <= 0)
                 {
-                    // Find Seller.
+                    // Fetch Seller.
                     User Seller = _db.Users.FirstOrDefault(u => u.UserId == Item.Seller.UserId);
-                    // Find Top Bid.
+                    // Fetch Top Bid.
                     Bid WinningBid = _db.Bids.OrderByDescending(i => i.Ammount).First();
-                    // Find winning buyer.
+                    // Fetch winning buyer.
                     User Winner = _db.Users.FirstOrDefault(u => u.UserId == WinningBid.UserId);
                     // Buyer Wallet decreases.
                     Winner.Wallet -= (int)WinningBid.Ammount;

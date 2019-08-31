@@ -58,8 +58,7 @@ namespace Auction.Models
             }
         }
         // Link & Navigation
-        //[Required]
-        [JsonIgnore]
+        [Required]
         public int? UserId {get;set;} = null;
         public User Seller {get;set;}
         public ICollection<Bid> Bids {get;set;}

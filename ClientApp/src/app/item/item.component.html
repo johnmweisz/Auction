@@ -1,7 +1,7 @@
 <div *ngIf="item">
   <p>{{ item.Name }}</p>
   <p>{{ item.Seller.FirstName}} {{ item.Seller.LastName}}</p>
-  <p >{{ item.Bids[lastbid].User.FirstName }} bid ${{ item.Bids[lastbid].Ammount }}</p>
+  <p >{{ item.Bids[0].User.FirstName }} bid ${{ item.Bids[0].Ammount }}</p>
 </div>
 <div>
   <h3>Add Bid</h3>

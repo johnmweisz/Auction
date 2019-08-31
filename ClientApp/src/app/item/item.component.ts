@@ -10,7 +10,6 @@ import { ActivatedRoute, Params, Router } from "@angular/router";
 export class ItemComponent implements OnInit {
   
   public ItemId: number;
-  public UserId: number;
   public Ammount: number;
   public item: object;
   public errors: object = [];
@@ -34,7 +33,12 @@ export class ItemComponent implements OnInit {
     }
 
   ngOnInit() {
-    this.getUser();
+    if(JSON.parse(sessionStorage.getItem('user')) == null)
+    {
+      return this._router.navigate(['login']);
+    } else{
+      this.user = JSON.parse(sessionStorage.getItem('user'));
+    }
   }
 
   getItem(){
@@ -47,16 +51,6 @@ export class ItemComponent implements OnInit {
     );
   }
   
-  getUser(): void {
-    this._http.get<object>('./Home/GetUser').subscribe(
-      result => {
-        this.user = result;
-        this.UserId = result['UserId'];
-      },
-      error => console.error(error)
-    )
-  }
-
   Bid(){
     if(this.Ammount == null){
       this.errors['Ammount'] = "Please enter a value";
@@ -64,7 +58,7 @@ export class ItemComponent implements OnInit {
     }
     const NewBid = {
       Ammount: this.Ammount,
-      UserId: this.UserId,
+      UserId: this.user['UserId'],
       ItemId: this.ItemId,
     }
     return this._http.post("./Home/BidItem", NewBid).subscribe(

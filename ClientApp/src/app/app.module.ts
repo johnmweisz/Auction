@@ -29,10 +29,12 @@ import { RegisterComponent } from './register/register.component';
     HttpClientModule,
     FormsModule,
     RouterModule.forRoot([
-      { path: 'home', component: HomeComponent, pathMatch: 'full' },
+      { path: '', component: HomeComponent, pathMatch: 'full' },
       { path: 'auction', component: AuctionComponent },
       { path: 'new', component: NewItemComponent},
       { path: 'item/:ItemId', component: ItemComponent},
+      { path: 'login', component: LoginComponent},
+      { path: 'register', component: RegisterComponent},
     ])
   ],
   providers: [],

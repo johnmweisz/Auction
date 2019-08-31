@@ -8,10 +8,11 @@ using Auction.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace Auction.Controllers
 {
-    
+    [Route("[controller]")]
     public class LogRegController : Controller
     {
         private Context _db;
@@ -19,70 +20,66 @@ namespace Auction.Controllers
         {
             _db = context;
         }
-        [HttpGet("")]
-        public IActionResult LogReg()
-        {
-            return View();
-        }
-        [HttpPost("register")]
-        public IActionResult Register(LogReg LogReg)
+        [HttpPost("[action]")]
+        public IActionResult Register([FromBody] User NewUser)
         {
             if(ModelState.IsValid)
             {
                 // Check if Email already exists.
-                if(_db.Users.Any(u => u.Email == LogReg.Register.Email))
+                if(_db.Users.Any(u => u.Email == NewUser.Email))
                 {
                     ModelState.AddModelError("Register.Email", "already in use, please log in.");
-                    return View("LogReg");
+                    return BadRequest(Json(ModelState));
                 }
                 // Hash password.
                 PasswordHasher<User> Hasher = new PasswordHasher<User>();
-                LogReg.Register.Password = Hasher.HashPassword(LogReg.Register, LogReg.Register.Password);
-                _db.Add(LogReg.Register);
+                NewUser.Password = Hasher.HashPassword(NewUser, NewUser.Password);
+                _db.Add(NewUser);
                 _db.SaveChanges();
-                // Save ID to Session.
-                User GetID = _db.Users.FirstOrDefault(u => u.Email == LogReg.Register.Email);
-                HttpContext.Session.SetInt32("UserId", GetID.UserId);
-                // Redirect to Main App.
-                return RedirectToAction("Index", "Home");
+                return Ok(JsonConvert.SerializeObject(NewUser, Formatting.Indented, 
+                    new JsonSerializerSettings 
+                        { 
+                            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                        }
+                ));
             }
-            // Render form with errors.
-            return View("LogReg");
+            return BadRequest(Json(ModelState));
         }
-        [HttpPost("login")]
-        public IActionResult Login(LogReg LogReg)
+
+        [HttpPost("[action]")]
+        public IActionResult Login([FromBody] Login TryUser)
         {
             if(ModelState.IsValid)
             {
                 // Find user that matches Email provided.
-                User FindUserById = _db.Users.FirstOrDefault(u => u.Email == LogReg.Login.Email);
+                User FindUserByEmail = _db.Users.FirstOrDefault(u => u.Email == TryUser.Email);
                 // Check if email does not exist.
-                if(FindUserById == null)
+                if(FindUserByEmail == null)
                 {
                     ModelState.AddModelError("Login.Email", "does not exist, please register.");
-                    return View("LogReg");
+                    return BadRequest(Json(ModelState));
                 }
                 // Convert string to hash and compare against hashed hassword in the _db.
                 var hasher = new PasswordHasher<User>();
-                var result = hasher.VerifyHashedPassword(FindUserById, FindUserById.Password, LogReg.Login.Password);
+                var result = hasher.VerifyHashedPassword(FindUserByEmail, FindUserByEmail.Password, TryUser.Password);
                 // If hash matches, add User Id to session.
                 if(result == PasswordVerificationResult.Success)
                 {
-                    HttpContext.Session.SetInt32("UserId", FindUserById.UserId);
+                    HttpContext.Session.SetInt32("UserId", FindUserByEmail.UserId);
                     // Redirect to Main App.
-                    return RedirectToAction("Index", "Home");
+                    return Ok(JsonConvert.SerializeObject(FindUserByEmail, Formatting.Indented, 
+                        new JsonSerializerSettings 
+                            { 
+                                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                            }
+                    ));
                 }
                 // If hash does not match, render form with errors.
                 ModelState.AddModelError("Login.Password", "incorrect!");
-                return View("LogReg");
+                return BadRequest(Json(ModelState));
             }
-            return View("LogReg");
+            return BadRequest(Json(ModelState));
         }
-        [HttpGet("logout")]
-        public IActionResult Logout()
-        {
-            HttpContext.Session.Clear();
-            return RedirectToAction("LogReg");
-        }
+
     }
 }

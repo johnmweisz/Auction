@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { ActivatedRoute, Params, Router } from "@angular/router";
 
 @Component({
   selector: 'app-auction',
@@ -10,13 +11,20 @@ export class AuctionComponent implements OnInit {
   public user: object;
   public items: object;
 
-  constructor(private _http: HttpClient) { 
+  constructor(
+    private _http: HttpClient,
+    private _router: Router
+    ) { 
     this.getItems();
-    this.getUser();
   }
 
   ngOnInit() {
-
+    if(JSON.parse(sessionStorage.getItem('user')) == null)
+    {
+      return this._router.navigate(['login']);
+    } else{
+      this.user = JSON.parse(sessionStorage.getItem('user'));
+    }
   }
 
   getItems(){
@@ -26,10 +34,4 @@ export class AuctionComponent implements OnInit {
     )
   }
 
-  getUser(): void {
-    this._http.get<object>('./Home/GetUser').subscribe(
-      result => this.user = result,
-      error => console.error(error)
-    )
-  }
 }
