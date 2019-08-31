@@ -29,8 +29,11 @@ export class AuctionComponent implements OnInit {
 
   getItems(){
     this._http.get<object>('./Home/GetItems').subscribe(
-      result => this.items = result, 
-      error => console.error(error)
+      res => {
+        this.items = res
+        console.log(res);
+      }, 
+      err => console.error(err)
     )
   }
 

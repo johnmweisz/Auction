@@ -23,19 +23,45 @@ namespace Auction.Controllers
         public IActionResult GetItems()
         {
             ResolveAuction();
-            // Fetch list of all Items.
+            // Fetch list and sort bids.
             List<Item> AllItems = _db.Items
-            .Include(a => a.Seller)
-            .Include(a => a.Bids)
-                .ThenInclude(l => l.User)
-            .OrderBy(a => a.End)
+            .Include(i => i.Seller)
+            .Include(i => i.Bids)
+                .ThenInclude(b => b.User)
+            .OrderBy(i => i.End)
             .ToList();
+            AllItems.ForEach(i => i.Bids = i.Bids.OrderByDescending(b => b.Ammount).ToList());
             return Ok(JsonConvert.SerializeObject(AllItems, Formatting.Indented, 
                 new JsonSerializerSettings 
                     { 
                         ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                     }
             ));
+        }
+
+        [HttpGet("[action]/{ItemId}")]
+        public IActionResult GetItem(int? ItemId)
+        {
+            if(ItemId != null)
+            {
+                // Fetch list and sort bids.
+                List<Item> AllItems = _db.Items
+                .Include(i => i.Seller)
+                .Include(i => i.Bids)
+                    .ThenInclude(b => b.User)
+                .OrderBy(i => i.End)
+                .ToList();
+                AllItems.ForEach(i => i.Bids = i.Bids.OrderByDescending(b => b.Ammount).ToList());
+                // Fetch Item.
+                Item GetItemById = AllItems.FirstOrDefault(i => i.ItemId == ItemId);
+                return Ok(JsonConvert.SerializeObject(GetItemById, Formatting.Indented,
+                    new JsonSerializerSettings 
+                        { 
+                            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                        }
+                ));
+            }
+            return BadRequest();
         }
 
         [HttpPost("[action]")]
@@ -56,27 +82,6 @@ namespace Auction.Controllers
                 return Ok(Json(new {ItemId = NewBid.ItemId}));
             }
             return BadRequest(Json(ModelState));
-        }
-
-        [HttpGet("[action]/{ItemId}")]
-        public IActionResult GetItem(int? ItemId)
-        {
-            if(ItemId != null)
-            {
-                // Fetch Item.
-                Item GetItemById = _db.Items
-                .Include(i => i.Seller)
-                .Include(a => a.Bids)
-                    .ThenInclude(b => b.User)
-                .FirstOrDefault(a => a.ItemId == ItemId);
-                return Ok(JsonConvert.SerializeObject(GetItemById, Formatting.Indented, 
-                    new JsonSerializerSettings 
-                        { 
-                            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                        }
-                ));
-            }
-            return BadRequest();
         }
 
         [HttpPost("[action]")]

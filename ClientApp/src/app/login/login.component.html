@@ -4,17 +4,21 @@
             <label for="Email">Email</label>
             <input class="form-control" type="email" name="Email" required #valEmail='ngModel' [(ngModel)]="Email" placeholder="Email">
             <div *ngIf="errors?.Email">
-                <p>{{ errors.Email.message }}</p>
+                <p>{{ errors.Email }}</p>
             </div>
         </div>
         <div class="form-group">
             <label for="Password">Password</label>
             <input class="form-control" type="password" name="Password" required #valPassword='ngModel' [(ngModel)]="Password" placeholder="Password">
             <div *ngIf="errors?.Password">
-                <p>{{ errors.Password.message }}</p>
+                <p>{{ errors.Password }}</p>
             </div>
         </div>
-        <button class="btn btn-danger" *ngIf="!valForm.valid" type="button">Submit</button>
-        <button class="btn btn-primary" *ngIf="valForm.valid" type="submit">Submit</button>
+        <div>
+            <button class="btn btn-danger" *ngIf="!valForm.valid" type="button">Submit</button>
+            <button class="btn btn-primary" *ngIf="valForm.valid" type="submit">Submit</button>
+            <button class="btn btn-primary" [routerLink]='["/register"]' type="button">Register</button>
+        </div>
+
     </form>
 </div>

@@ -13,7 +13,7 @@ export class RegisterComponent implements OnInit {
   Email:string;
   Password:string;
   Confirm:string;
-  errors:object[];
+  errors:object[] = [];
 
   constructor(
     private _http: HttpClient,

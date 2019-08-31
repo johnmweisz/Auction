@@ -28,7 +28,7 @@ namespace Auction.Controllers
                 // Check if Email already exists.
                 if(_db.Users.Any(u => u.Email == NewUser.Email))
                 {
-                    ModelState.AddModelError("Register.Email", "already in use, please log in.");
+                    ModelState.AddModelError("Email", "already in use, please log in.");
                     return BadRequest(Json(ModelState));
                 }
                 // Hash password.
@@ -56,17 +56,14 @@ namespace Auction.Controllers
                 // Check if email does not exist.
                 if(FindUserByEmail == null)
                 {
-                    ModelState.AddModelError("Login.Email", "does not exist, please register.");
+                    ModelState.AddModelError("Email", "does not exist, please register.");
                     return BadRequest(Json(ModelState));
                 }
                 // Convert string to hash and compare against hashed hassword in the _db.
                 var hasher = new PasswordHasher<User>();
                 var result = hasher.VerifyHashedPassword(FindUserByEmail, FindUserByEmail.Password, TryUser.Password);
-                // If hash matches, add User Id to session.
                 if(result == PasswordVerificationResult.Success)
                 {
-                    HttpContext.Session.SetInt32("UserId", FindUserByEmail.UserId);
-                    // Redirect to Main App.
                     return Ok(JsonConvert.SerializeObject(FindUserByEmail, Formatting.Indented, 
                         new JsonSerializerSettings 
                             { 
@@ -74,8 +71,7 @@ namespace Auction.Controllers
                             }
                     ));
                 }
-                // If hash does not match, render form with errors.
-                ModelState.AddModelError("Login.Password", "incorrect!");
+                ModelState.AddModelError("Password", "incorrect!");
                 return BadRequest(Json(ModelState));
             }
             return BadRequest(Json(ModelState));
