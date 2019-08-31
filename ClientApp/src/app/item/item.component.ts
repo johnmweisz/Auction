@@ -43,9 +43,10 @@ export class ItemComponent implements OnInit {
 
   getItem(){
     this._http.get<object>(`./Home/GetItem/${this.ItemId}`).subscribe(
-      result => {
-        this.item = result
-        this.lastbid = result['Bids'].length-1;
+      res => {
+        console.log(res);
+        this.item = res;
+        this.lastbid = res['Bids'].length-1;
       }, 
       err => console.error(err)
     );

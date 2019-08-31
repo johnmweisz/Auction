@@ -99,7 +99,7 @@ namespace Auction.Controllers
                 return BadRequest(Json(ModelState));
             }
             // Check if bid is higher than previous bid & min.
-            if(WinningBid.Ammount > TryBid.Ammount)
+            if(WinningBid.Ammount >= TryBid.Ammount)
             {
                 ModelState.AddModelError("Ammount", "Your bid is not high enough.");
                 return BadRequest(Json(ModelState));

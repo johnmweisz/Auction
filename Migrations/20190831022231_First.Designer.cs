@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Auction.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20190828223342_First")]
+    [Migration("20190831022231_First")]
     partial class First
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
